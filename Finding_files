@@ -1,0 +1,19 @@
+####first what I am going to do, is identify what the fields are 
+head -n 1 S_rugosos_PFAM| awk '{for (i=1; i<=NF; i++) printf("%d\t%s\n", i, $i)}'
+
+###so field 3 is what I want
+awk 'BEGIN {FS="\t"} NR>1 {print $3}' S_rugosos_PFAM > S_rugoso_PFAM_LerceprotIDs
+
+###Now I will add jgi| to the start of all the protein names, so that they can match 
+##note, this is what I would use to modify lines in file  awk 'BEGIN {FS="\t"} {$3="jgi|" $3; print}' S_rugosos_PFAM > S_rugoso_PFAM_LerceprotIDs
+awk 'BEGIN {FS="\t"} NR>1 {print "jgi|"$3}' S_rugosos_PFAM > S_rugoso_PFAM_LerceprotIDs
+
+####concatonated all non OG lines into a single row 
+awk '{if ($1 ~ /^OG/) {if (line) print line; line=$0} else line=line" "$0} END{print line}' Orthogroup_Lerer_nofilters > OG_lines_concat
+
+###now got the OGs of interest 
+grep -f "S_rugoso_PFAM_LerceprotIDs" OG_lines_concat | awk 'BEGIN {FS="\t"} {print $1}' > OGs_of_interest
+
+###location of file that contains all the trees
+#/Volumes/archive/userdata/student_users/finndobbie/Orthofinder/OrthoFinder_conda/OrthoFinder_source/Protein_files/Species/Originals/OrthoFinder/Results_Apr01/Gene_Trees
+GENE_TREES=
